@@ -35,7 +35,19 @@ defaults
 ```
 Раздел listen объединяет в себе описание для фронтенда и бэкенда и содержит полный список прокси. Он полезен для TCP трафика.
 ```
- 
+ listen stats-srv-3.my.com *:8180   #описание IP: порта доступа к статистике
+stats uri /stats                    # URL доступа к статистеке
+stats realm Haproxy\ Statistics     #титл странички статистики
+stats show-legends                  #отобразать в статистеке дополнительную информацию о параметрах
+stats refresh 5s                    # интервал автоматического обнавления странички статистики
+maxconn 300
+mode http
+option httpclose
+transparent
+stats auth test:test                #логин и пароль для доступа к статистике
+clitimeout 10000
+srvtimeout 10000
+contimeout 4000
 ```
 Раздел Frontend определяет, каким образом перенаправлять запросы к бэкенду в зависимости от того, что за запрос поступил от клиента.
 ```
@@ -48,6 +60,8 @@ defaults
 ```
 backend http-backend                #указываем список нод или серверов, на которые пересылаем
   mode http
+  fullconn 200                      # максимальное значение одновременных конектов
+  stats enable                      #включить статистику
   balance roundrobin                #делать авто баланс между несколькими нодами в рамках этого backend 
     server srv1 luna-1:80 check
     server srv2 luna-2:80 check
